@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird with Valentine Surprise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ffdee9, #b5fffc);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        #gameContainer {
+            text-align: center;
+            position: relative;
+            max-width: 420px;
+            margin: 0 auto;
+            width: 100vw;
+        }
+        canvas {
+            border: 4px solid #FFD700;
+            border-radius: 12px;
+            background: linear-gradient(to right, #ffdee9, #b5fffc);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        #gameInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 10px;
+            z-index: 2;
+        }
+        #instructions {
+            margin-top: 16px;
+            color: #bb00ff;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        #gameOver, #congratulations, #preStartMessage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            color: #FFD700;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            border-radius: 12px;
+        }
+        #gameOver {
+            color: white;
+            background: rgba(0, 0, 0, 0.92);
+            border: 2px solid #bb00ff;
+            padding: 30px 10px;
+        }
+        #gameOver h2 {
+            margin-top: 0;
+            color: #ff6b6b;
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        #gameOver button {
+            background: linear-gradient(to right, #4CAF50, #2E8B57);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #gameOver button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        #congratulations {
+            color: white;
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #bb00ff;
+            box-shadow: 0 0 50px #bb00ff88;
+            padding: 30px 10px;
+        }
+        #congratsHeader {
+            font-size: 36px;
+            margin-bottom: 16px;
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        #congratsMessage {
+            font-size: 22px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        #congratsScore {
+            font-size: 26px;
+            margin: 16px 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .congrats-btn {
+            background: linear-gradient(to right, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            min-width: 140px;
+        }
+        .congrats-btn.secondary {
+            background: linear-gradient(to right, #3498db, #2980b9);
+        }
+        .congrats-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        #preStartMessage h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        #preStartMessage p {
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+        .celebration {
+            pointer-events: none;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 30;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            top: -20px;
+            width: 10px;
+            height: 18px;
+            border-radius: 3px;
+            opacity: 0.8;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes confetti-fall {
+            to {
+                top: 100%;
+                transform: rotate(360deg);
+                opacity: 0.2;
+            }
+        }
+        .emoji {
+            position: absolute;
+            top: -30px;
+            opacity: 0.9;
+            animation: emoji-fall linear forwards;
+        }
+        @keyframes emoji-fall {
+            to {
+                top: 100%;
+                opacity: 0.1;
+                transform: rotate(360deg) scale(1.2);
+            }
+        }
+        @media (max-width: 500px) {
+            #gameContainer {
+                max-width: 100vw;
+            }
+            canvas {
+                max-width: 98vw;
+            }
+            #gameInfo {
+                font-size: 16px;
+                padding: 6px 8px;
+            }
+            #instructions {
+                font-size: 15px;
+            }
+            #gameOver, #congratulations, #preStartMessage {
+                padding: 10px 2px;
+                font-size: 15px;
+            }
+            .congrats-btn, #gameOver button {
+                font-size: 14px;
+                padding: 8px 12px;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Pre-start message -->
+        <div id="preStartMessage">
+            <h2>🎁 Before you get your surprise…</h2>
+            <p>…you gotta beat the game. Enjoy! 🎮</p>
+            <p style="font-size: 1rem; color: #fff;">Click or press SPACE to start!</p>
+        </div>
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <div id="gameInfo">
+            <div>Score: <span id="score">0</span></div>
+            <div>Best: <span id="bestScore">0</span></div>
+        </div>
+        <div id="instructions">
+            Click or Press SPACE to flap! Reach 5 points to see a surprise!
+        </div>
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Score: <span id="finalScore">0</span></p>
+            <p>Best Score: <span id="finalBestScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+        <!-- Congratulations Message -->
+        <div id="congratulations">
+            <div id="congratsHeader">🎉 Congratulations! 🎉</div>
+            <div id="congratsMessage">You've reached the goal of 5 points!</div>
+            <div id="congratsScore">Final Score: <span id="congratsFinalScore">5</span></div>
+            <div class="button-container">
+                <button class="congrats-btn" onclick="window.location.href='/ValentineGift/flower.html'">See Your Surprise</button>
+                <button class="congrats-btn secondary" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+        <div id="celebration" class="celebration"></div>
+    </div>
+    <!-- ...your JS code here... -->
+
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game variables
+        let gameRunning = false;
+        let gameStarted = false;
+        let score = 0;
+        let bestScore = 0;
+        const goalScore = 5;
+
+        
+        
+        // Bird object
+        const bird = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 30,
+            height: 25,
+            velocity: 0,
+            gravity: 0.4,
+            jump: -8,
+            color: '#FFD700'
+        };
+        
+        // Pipes array
+        let pipes = [];
+        const pipeWidth = 50;
+        const pipeGap = 150;
+        const pipeSpeed = 2;
+        
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function update() {
+            // Update bird
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            
+            // Generate pipes
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
+                generatePipe();
+            }
+            
+            // Update pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= pipeSpeed;
+                
+                // Remove off-screen pipes
+                if (pipes[i].x + pipeWidth < 0) {
+                    pipes.splice(i, 1);
+                    score++;
+                    updateScore();
+                    
+                    // Check if goal is reached
+                    if (score >= goalScore) {
+                        showCongratulations();
+                        return;
+                    }
+                }
+            }
+            
+            // Collision detection
+            if (checkCollision()) {
+                gameOver();
+            }
+            
+            // Check if bird is off screen
+            if (bird.y > canvas.height || bird.y < 0) {
+                gameOver();
+            }
+        }
+        
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#4facfe';
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.7);
+            ctx.fillStyle = '#90EE90';
+            ctx.fillRect(0, canvas.height * 0.7, canvas.width, canvas.height * 0.3);
+            
+            // Draw pipes
+            ctx.fillStyle = '#228B22';
+            for (let pipe of pipes) {
+                // Top pipe
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                // Bottom pipe
+                ctx.fillRect(pipe.x, pipe.topHeight + pipeGap, pipeWidth, canvas.height - pipe.topHeight - pipeGap);
+                
+                // Pipe highlights
+                ctx.fillStyle = '#32CD32';
+                ctx.fillRect(pipe.x, 0, 5, pipe.topHeight);
+                ctx.fillRect(pipe.x, pipe.topHeight + pipeGap, 5, canvas.height - pipe.topHeight - pipeGap);
+                ctx.fillStyle = '#228B22';
+            }
+            
+            // Draw bird
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.arc(bird.x + bird.width/2, bird.y + bird.height/2, bird.width/2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bird eye
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(bird.x + bird.width/2 + 5, bird.y + bird.height/2 - 3, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(bird.x + bird.width/2 + 6, bird.y + bird.height/2 - 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bird beak
+            ctx.fillStyle = '#FF8C00';
+            ctx.beginPath();
+            ctx.moveTo(bird.x + bird.width, bird.y + bird.height/2);
+            ctx.lineTo(bird.x + bird.width + 8, bird.y + bird.height/2 - 2);
+            ctx.lineTo(bird.x + bird.width + 8, bird.y + bird.height/2 + 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw start message
+            if (!gameStarted) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 36px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Flappy Bird', canvas.width/2, canvas.height/2 - 50);
+
+                ctx.font = 'bold 20px Arial';
+                ctx.fillText('Beat the game to get your Surprise', canvas.width/2, canvas.height/2 + 10);
+                
+                ctx.font = 'bold 20px Arial';
+                ctx.fillText('Click or Press SPACE to start!', canvas.width/2, canvas.height/2 + 40);
+                
+                ctx.font = '18px Arial';
+                ctx.fillText('Reach 5 points to unlock a surprise!', canvas.width/2, canvas.height/2 + 70);
+            }
+        }
+        
+        function generatePipe() {
+            const minHeight = 50;
+            const maxHeight = canvas.height - pipeGap - minHeight;
+            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            
+            pipes.push({
+                x: canvas.width,
+                topHeight: topHeight
+            });
+        }
+        
+        function checkCollision() {
+            for (let pipe of pipes) {
+                // Check collision with top pipe
+                if (bird.x < pipe.x + pipeWidth && 
+                    bird.x + bird.width > pipe.x && 
+                    bird.y < pipe.topHeight) {
+                    return true;
+                }
+                
+                // Check collision with bottom pipe
+                if (bird.x < pipe.x + pipeWidth && 
+                    bird.x + bird.width > pipe.x && 
+                    bird.y + bird.height > pipe.topHeight + pipeGap) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function flap() {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            
+            if (gameRunning) {
+                bird.velocity = bird.jump;
+            }
+        }
+        
+        function startGame() {
+            // Hide pre-start message
+            document.getElementById('preStartMessage').style.display = 'none';
+
+            gameStarted = true;
+            gameRunning = true;
+            score = 0;
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            pipes = [];
+            updateScore();
+            gameLoop();
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            // Update best score
+            if (score > bestScore) {
+                bestScore = score;
+            }
+            
+            // Show game over screen
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalBestScore').textContent = bestScore;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+        
+        function showCongratulations() {
+            gameRunning = false;
+            
+            // Update best score
+            if (score > bestScore) {
+                bestScore = score;
+            }
+            
+            // Update congratulations score
+            document.getElementById('congratsFinalScore').textContent = score;
+            
+            // Show congratulations message
+            document.getElementById('congratulations').style.display = 'block';
+        }
+        
+        function startCelebration() {
+            const celebration = document.getElementById('celebration');
+            celebration.style.display = 'block';
+            
+            // Create confetti
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 30);
+            }
+            
+            // Create emoji
+            const emojis = ['❤️', '💖', '💗', '💘', '💝', '💞', '💕', '💓', '💌', '🥰'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    createEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+                }, i * 200);
+            }
+        }
+        
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = getRandomColor();
+            confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.getElementById('celebration').appendChild(confetti);
+            
+            // Remove confetti after animation completes
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+        
+        function createEmoji(emoji) {
+            const emojiElement = document.createElement('div');
+            emojiElement.className = 'emoji';
+            emojiElement.textContent = emoji;
+            emojiElement.style.left = Math.random() * 100 + 'vw';
+            emojiElement.style.fontSize = (Math.random() * 30 + 20) + 'px';
+            emojiElement.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            document.getElementById('celebration').appendChild(emojiElement);
+            
+            // Remove emoji after animation completes
+            setTimeout(() => {
+                emojiElement.remove();
+            }, 5000);
+        }
+        
+        function getRandomColor() {
+            const colors = ['#FF5252', '#FF8E8E', '#FF6B6B', '#FF4D94', '#FF69B4'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('congratulations').style.display = 'none';
+            document.getElementById('celebration').style.display = 'none';
+            document.getElementById('celebration').innerHTML = '';
+            gameStarted = false;
+            gameRunning = false;
+            score = 0;
+            bird.x = 50;
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            pipes = [];
+            updateScore();
+            draw();
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('bestScore').textContent = bestScore;
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', flap);
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                flap();
+            }
+        });
+        
+        // Initialize game
+        updateScore();
+        draw();
+
+        
+    
+    </script>
+</body>
+</html>

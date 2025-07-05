@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Quest - Levels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ffdee9, #b5fffc);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(#ffd6e7 2px, transparent 3px),
+                radial-gradient(#ffb6c1 1px, transparent 2px);
+            background-size: 100px 100px, 50px 50px;
+            background-position: 0 0, 25px 25px;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            z-index: 10;
+            max-width: 800px;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+            color: #d14d72;
+            position: relative;
+            display: inline-block;
+        }
+
+        
+
+        .header p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            display: flex;
+            width: 100vw;
+            position: relative;
+        }
+
+        .carousel-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            width: 900px;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-card {
+            position: absolute;
+            width: 300px;
+            height: 400px;
+            background: rgb(255, 255, 255);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .level-card.completed {
+            border-color: #ffd6e7;
+            background: rgba(255, 214, 231, 0.85);
+        }
+
+        .level-card.current {
+            border-color: #ff9eb5;
+            background: rgb(255, 255, 255);
+            animation: pulse 2s infinite;
+        }
+
+        .level-card.locked {
+            background: rgba(200, 200, 200, 0.5);
+        }
+
+        .level-card.active {
+            transform: scale(1.1) translateY(-10px);
+            z-index: 10;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-card.left {
+            transform: translateX(-250px) scale(0.8);
+            opacity: 0.7;
+            z-index: 5;
+        }
+
+        .level-card.right {
+            transform: translateX(250px) scale(0.8);
+            opacity: 0.7;
+            z-index: 5;
+        }
+
+        .level-card.far-left {
+            transform: translateX(-400px) scale(0.6);
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        .level-card.far-right {
+            transform: translateX(400px) scale(0.6);
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        .level-number {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #d14d72;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+
+        .level-year {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #d14d72;
+        }
+
+        .level-status {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .completed .level-status {
+            color: #e98ead;
+        }
+
+        .current .level-status {
+            color: #ff6b9c;
+        }
+
+        .locked .level-status {
+            color: #a0a0a0;
+        }
+
+        .level-icon {
+            font-size: 4rem;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .completed .level-icon {
+            color: #ff9eb5;
+        }
+
+        .current .level-icon {
+            color: #ff6b9c;
+        }
+
+        .locked .level-icon {
+            color: #a0a0a0;
+        }
+
+        .level-details {
+            background: rgb(255, 255, 255);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 2px solid rgba(255, 182, 193, 0.3);
+        }
+
+        .level-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #d14d72;
+        }
+
+        .level-desc {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .star {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin: 0 3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #ff9eb5, #ff6b9c);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(255, 107, 156, 0.3);
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 156, 0.4);
+        }
+
+        .completed .action-button {
+            background: linear-gradient(45deg, #e98ead, #d14d72);
+        }
+
+        .current .action-button {
+            background: linear-gradient(45deg, #ff6b9c, #d14d72);
+            animation: pulseBtn 1.5s infinite;
+        }
+
+        .locked .action-button {
+            background: linear-gradient(45deg, #b0b0b0, #808080);
+            cursor: not-allowed;
+        }
+
+        .nav-arrows {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+            z-index: 20;
+            color: #d14d72;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #ffd6e7;
+        }
+
+        .nav-arrows:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+            color: #ff6b9c;
+        }
+
+        .nav-prev {
+            left: 20px;
+        }
+
+        .nav-next {
+            right: 20px;
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.4);
+            height: 25px;
+            border-radius: 12px;
+            margin: 30px auto;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #ffd6e7;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd6e7, #ff9eb5, #ff6b9c);
+            border-radius: 10px;
+            width: 38%; /* 19/50 levels completed */
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #d14d72;
+        }
+
+        .level-count {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #d14d72;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: #d14d72;
+            border: 2px solid #ffd6e7;
+        }
+
+        .back-button:hover {
+            background: white;
+            transform: scale(1.1);
+            color: #ff6b9c;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+            50% { transform: scale(1.03) translateY(-10px); box-shadow: 0 25px 60px rgba(255,107,156,0.4); }
+            100% { transform: scale(1) translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        }
+
+        @keyframes pulseBtn {
+            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(255,107,156,0.3); }
+            50% { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,107,156,0.5); }
+            100% { transform: translateY(0); box-shadow: 0 4px 10px rgba(255,107,156,0.3); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 1000px) {
+            .carousel-wrapper {
+                width: 700px;
+                height: 380px;
+                max-width: 98vw;
+                max-height: 50vh;
+            }
+            .level-card {
+                width: 220px;
+                height: 300px;
+                max-width: 90vw;
+                max-height: 45vh;
+                padding: 18px;
+            }
+            
+            .level-card.left {
+                transform: translateX(-180px) scale(0.8);
+            }
+            
+            .level-card.right {
+                transform: translateX(180px) scale(0.8);
+            }
+            
+            .level-card.far-left {
+                transform: translateX(-300px) scale(0.6);
+            }
+            
+            .level-card.far-right {
+                transform: translateX(300px) scale(0.6);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header h1::after, .header h1::before {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .carousel-wrapper {
+                width: 500px;
+                height: 400px;
+            }
+            
+            .level-card {
+                width: 200px;
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .level-number {
+                font-size: 3.5rem;
+            }
+            
+            .level-year {
+                font-size: 1.2rem;
+            }
+            
+            .level-icon {
+                font-size: 3rem;
+            }
+            
+            .level-title {
+                font-size: 1.1rem;
+            }
+            
+            .level-desc {
+                font-size: 0.8rem;
+                min-height: 50px;
+            }
+            
+            .action-button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                height: 60vh;
+            }
+            
+            .carousel-wrapper {
+                width: 320px;
+            }
+            
+            .level-card {
+                width: 180px;
+                height: 280px;
+            }
+            
+            .level-card.left {
+                transform: translateX(-120px) scale(0.8);
+            }
+            
+            .level-card.right {
+                transform: translateX(120px) scale(0.8);
+            }
+            
+            .level-card.far-left {
+                transform: translateX(-180px) scale(0.6);
+            }
+            
+            .level-card.far-right {
+                transform: translateX(180px) scale(0.6);
+            }
+            
+            .nav-arrows {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.history.back()">‹</button>
+    
+    <div class="header">
+        <h1>Birthday Quest</h1>
+    </div>
+    
+    <div class="container">
+        <div class="carousel-section">
+            <div class="carousel-wrapper" id="carouselWrapper">
+                <!-- Level cards will be generated by JavaScript -->
+            </div>
+            
+            <button class="nav-arrows nav-prev" id="prevBtn">‹</button>
+            <button class="nav-arrows nav-next" id="nextBtn">›</button>
+        </div>
+    </div>
+    
+    
+
+    <script>
+        // Birthday level data
+        const levels = [];
+        const startYear = 2007;
+        const totalLevels = 50;
+        
+        // Birthday-themed level titles
+        const birthdayTitles = [
+            "First Celebration", "Toddler Adventure", "Preschool Party", "Kindergarten Fun",
+            "School Beginnings", "Growing Up Fast", "Friendship Year", "Learning Journey",
+            "Double Digits", "Pre-Teen Year", "Teenage Begins", "Sweet Thirteen",
+            "Milestone Fourteen", "Fifteen & Fabulous", "Sweet Sixteen", "Seventeen Steps",
+            "High School Senior", "Adulting Begins", "Special Birthday", "Future Celebration",
+            "Twenties Begin", "Career Building", "World Exploration", "Quarter Century",
+            "Life Adventures", "Thriving Twenties", "Dream Chasing", "New Horizons",
+            "Establishing Roots", "Thirty & Thriving", "Family Building", "Career Peak",
+            "Life Balance", "Mid-Thirties", "Personal Growth", "New Chapters",
+            "Late Thirties", "Forty Approaches", "Wisdom Years", "Prime Time",
+            "Fabulous Forties", "Midlife Adventures", "New Passions", "Reinvention",
+            "Golden Years", "Life Reflection", "Legacy Building", "Fifty & Fabulous",
+            "Life Celebration", "Cherished Memories", "Timeless Journey"
+        ];
+        
+        // Generate level data
+        for (let i = 1; i <= totalLevels; i++) {
+            let status = "locked";
+            if (i <= 18) status = "completed";
+            else if (i === 19) status = "current";
+            
+            const year = startYear + i - 1;
+            
+            levels.push({
+                number: i,
+                year: year,
+                status: status,
+                title: birthdayTitles[i-1] || "Birthday " + i,
+                description: getBirthdayDescription(i, year),
+                stars: i <= 18 ? Math.min(3, Math.ceil(i/6)) : 0
+            });
+        }
+        
+        // Current level index (centered on level 19 initially)
+        let currentIndex = 18; // Index 18 is level 19 (since array is 0-indexed)
+        const carouselWrapper = document.getElementById('carouselWrapper');
+        
+        // Generate level cards
+        function generateLevelCards() {
+            carouselWrapper.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const levelCard = document.createElement('div');
+                levelCard.className = `level-card ${level.status}`;
+                levelCard.dataset.index = index;
+                
+                // Generate star rating for completed levels
+                let starsHtml = '';
+                if (level.status === 'completed') {
+                    for (let i = 0; i < 3; i++) {
+                        if (i < level.stars) {
+                            starsHtml += `<span class="star">★</span>`;
+                        } else {
+                            starsHtml += `<span class="star" style="opacity:0.3">☆</span>`;
+                        }
+                    }
+                }
+                
+                levelCard.innerHTML = `
+                    <div>
+                        <div class="level-number">${level.number}</div>
+                        <div class="level-year">${level.year}</div>
+                        <div class="level-status">
+                            ${level.status === 'completed' ? 'Completed' : 
+                              level.status === 'current' ? 'Special Birthday' : 'Future Birthday'}
+                        </div>
+                        <div class="level-icon">
+                            ${level.status === 'completed' ? '🎂' : 
+                             level.status === 'current' ? '🎁' : 
+                             '🔒'}
+                        </div>
+                        <div class="stars">${starsHtml}</div>
+                    </div>
+                    <div class="level-details">
+                        <div class="level-title">${level.title}</div>
+                        <div class="level-desc">${level.description}</div>
+                        <button class="action-button">
+                            ${level.status === 'completed' ? 'Relive Memory' : 
+                             level.status === 'current' ? 'Celebrate Now' : 'Locked'}
+                        </button>
+                    </div>
+                `;
+                
+                carouselWrapper.appendChild(levelCard);
+            });
+            
+            updateCarousel();
+            updateProgress();
+        }
+        
+        // Update carousel positioning
+        function updateCarousel() {
+            const cards = document.querySelectorAll('.level-card');
+            const totalCards = cards.length;
+            
+            cards.forEach((card, index) => {
+                card.className = `level-card ${levels[index].status}`;
+                
+                const relativeIndex = (index - currentIndex + totalCards) % totalCards;
+                
+                if (relativeIndex === 0) {
+                    card.classList.add('active');
+                } else if (relativeIndex === 1) {
+                    card.classList.add('right');
+                } else if (relativeIndex === totalCards - 1) {
+                    card.classList.add('left');
+                } else if (relativeIndex === 2) {
+                    card.classList.add('far-right');
+                } else if (relativeIndex === totalCards - 2) {
+                    card.classList.add('far-left');
+                }
+            });
+        }
+    
+        
+        // Navigation functions
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % levels.length;
+            updateCarousel();
+        }
+        
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + levels.length) % levels.length;
+            updateCarousel();
+        }
+        
+        // Click handler for level cards
+        function handleCardClick(index) {
+            const level = levels[index];
+            
+            if (level.status === 'current') {
+                window.location.href = "game.html"; // Redirect to character page
+            } else if (level.status === 'completed') {
+                alert(`Reliving your ${level.year} birthday memories!`);
+            } else {
+                alert(`Your ${level.year} birthday is in the future! Stay tuned!`);
+            }
+        }
+        
+        // Generate birthday descriptions
+        function getBirthdayDescription(level, year) {
+            if (level <= 18) {
+                
+            } else if (level === 19) {
+                return "Your special birthday celebration happening now!";
+            } else {
+                
+            }
+        }
+        
+        // Initialize
+        document.getElementById('prevBtn').addEventListener('click', prevCard);
+        document.getElementById('nextBtn').addEventListener('click', nextCard);
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowLeft') prevCard();
+            if (e.key === 'Enter') {
+                const activeCard = document.querySelector('.level-card.active');
+                const index = parseInt(activeCard.dataset.index);
+                handleCardClick(index);
+            }
+        });
+        
+        // Add click listeners after cards are created
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.level-card');
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const index = parseInt(card.dataset.index);
+                    if (card.classList.contains('active')) {
+                        handleCardClick(index);
+                    } else {
+                        currentIndex = index;
+                        updateCarousel();
+                    }
+                });
+            });
+        }, 100);
+        
+        // Generate the carousel
+        generateLevelCards();
+    </script>
+</body>
+</html>

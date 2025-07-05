@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Quest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            overflow: hidden;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Splash Screen */
+        #splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s ease;
+        }
+        
+        .splash-content {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+        }
+        
+        .logo img {
+            max-width: 80%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .loading-dots span {
+            font-size: 48px;
+            margin: 0 5px;
+            animation: dotPulse 1.5s infinite;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .splash-subtitle {
+            font-size: 20px;
+            margin-top: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInOut 2s infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        #start-screen.active {
+            opacity: 1;
+        }
+        
+        .start-content {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            background: rgba(20, 20, 40, 0.6);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animation-column {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .text-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        .menu-logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .menu-logo h1 {
+            font-size: 48px;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+        
+        .menu-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 18px 30px;
+            margin: 15px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: 2px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+            border-color: #ff9966;
+        }
+        
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff9966, #ff5e62);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        
+        .menu-item:hover::before {
+            transform: translateX(0);
+        }
+        
+        .menu-instructions {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 400px;
+        }
+        
+        /* Animation elements */
+        .floating {
+            position: absolute;
+            animation: float linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes float {
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+        
+        .cake {
+            font-size: 60px;
+            color: #ff9966;
+            text-shadow: 0 0 10px rgba(255, 153, 102, 0.5);
+        }
+        
+        .gift {
+            font-size: 50px;
+            color: #ff5e62;
+            text-shadow: 0 0 10px rgba(255, 94, 98, 0.5);
+        }
+        
+        .balloon {
+            font-size: 70px;
+            color: #69f0ae;
+            text-shadow: 0 0 10px rgba(105, 240, 174, 0.5);
+        }
+        
+        .star {
+            font-size: 40px;
+            color: #ffd740;
+            text-shadow: 0 0 10px rgba(255, 215, 64, 0.5);
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            animation: confettiFall linear infinite;
+        }
+        
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Splash Screen -->
+        <div class="screen active" id="splash-screen">
+            <div class="splash-content">
+                <div class="logo">
+                    <h1 class="splash-title">
+                        <img src="https://via.placeholder.com/400x100/ff9966/ffffff?text=Birthday+Quest" alt="Birthday Quest Logo">
+                    </h1>
+                    <div class="loading-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                    </div>
+                </div>
+                <p class="splash-subtitle">Loading your special adventure...</p>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="screen" id="start-screen">
+            <div class="start-content">
+                <div class="animation-column" id="animation-area"></div>
+                <div class="text-column">
+                    <div class="menu-logo">
+                        <h1>BIRTHDAY QUEST</h1>
+                    </div>
+                    <div class="menu-container">
+                        <a href="charecter.html" class="menu-item">START GAME</a>
+                        <a href="levels.html" class="menu-item">CONTINUE</a>
+                        <a href="settings.html" class="menu-item">SETTINGS</a>
+                        <a href="AboutHer.html" class="menu-item">ABOUT</a>
+                        <a href="quit.html" class="menu-item">QUIT</a>
+                    </div>
+                    <div class="menu-instructions">
+                        <p>Use ↑↓ arrow keys or scroll to navigate • Press ENTER or click to select</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animation elements
+        function createAnimationElements() {
+            const animationArea = document.getElementById('animation-area');
+            const emojis = ['🎂', '🎁', '🎈', '🎉', '✨', '🎊', '🥳', '🎇', '🎆', '💫'];
+            const colors = ['#ff9966', '#ff5e62', '#69f0ae', '#40c4ff', '#ffd740', '#b388ff'];
+            
+            // Create floating emojis
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'floating';
+                    emoji.classList.add(i % 4 === 0 ? 'cake' : 
+                                      i % 4 === 1 ? 'gift' : 
+                                      i % 4 === 2 ? 'balloon' : 'star');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * 100 + '%';
+                    emoji.style.fontSize = (Math.random() * 40 + 30) + 'px';
+                    emoji.style.animationDuration = (Math.random() * 20 + 20) + 's';
+                    animationArea.appendChild(emoji);
+                }, i * 300);
+            }
+            
+            // Create confetti
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti-piece';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                    confetti.style.animationDelay = (Math.random() * 5) + 's';
+                    animationArea.appendChild(confetti);
+                }, i * 100);
+            }
+        }
+        
+        // Show Start Screen after splash
+        window.onload = function() {
+            createAnimationElements();
+            
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.remove('active');
+                setTimeout(() => {
+                    document.getElementById('start-screen').classList.add('active');
+                }, 500);
+            }, 3000); // Show splash for 3 seconds
+        };
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            const menuItems = document.querySelectorAll('.menu-item');
+            let currentIndex = -1;
+            
+            // Find currently focused item
+            menuItems.forEach((item, index) => {
+                if (item === document.activeElement) {
+                    currentIndex = index;
+                }
+            });
+            
+            // Navigation with arrow keys
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (currentIndex + 1) % menuItems.length;
+                menuItems[nextIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (currentIndex - 1 + menuItems.length) % menuItems.length;
+                menuItems[prevIndex].focus();
+            } else if (e.key === 'Enter' && currentIndex !== -1) {
+                e.preventDefault();
+                menuItems[currentIndex].click();
+            }
+        });
+    </script>
+</body>
+</html>
